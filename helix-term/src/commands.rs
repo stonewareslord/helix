@@ -397,6 +397,7 @@ impl MappableCommand {
         surround_add, "Surround add",
         surround_replace, "Surround replace",
         surround_delete, "Surround delete",
+        select_head_and_anchor, "Select head and anchor",
         select_textobject_around, "Select around object",
         select_textobject_inner, "Select inside object",
         goto_next_function, "Goto next function",
@@ -4437,6 +4438,42 @@ fn goto_next_test(cx: &mut Context) {
 
 fn goto_prev_test(cx: &mut Context) {
     goto_ts_object_impl(cx, "test", Direction::Backward)
+}
+
+fn select_head_and_anchor(cx: &mut Context) {
+    let (view, doc) = current!(cx.editor);
+    let selection = doc.selection(view.id);
+    let old_index = selection.primary_index();
+    let mut ranges = SmallVec::with_capacity(selection.len() * 2);
+
+    let mut new_index = old_index;
+    let mut num_split = 0;
+
+    for (i, range) in selection.ranges().iter().enumerate() {
+        let (from, to) = (range.from(), range.to().saturating_sub(1));
+        ranges.push(Range::new(from, from));
+        let split_this_range = from != to && from != to.saturating_add(1);
+
+        // We are on the range that represents their old index
+        if i == old_index {
+            // Shift the old index by the number of splits
+            new_index = old_index.saturating_add(num_split).saturating_add(
+                // Then, if the head is on the right, shift by one more
+                if split_this_range && range.direction() == Direction::Forward {
+                    1
+                } else {
+                    0
+                },
+            );
+        }
+
+        if split_this_range {
+            ranges.push(Range::new(to, to));
+            num_split += 1;
+        }
+    }
+
+    doc.set_selection(view.id, Selection::new(ranges, new_index));
 }
 
 fn select_textobject_around(cx: &mut Context) {

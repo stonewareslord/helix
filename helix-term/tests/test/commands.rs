@@ -217,6 +217,54 @@ async fn test_multi_selection_paste() -> anyhow::Result<()> {
 }
 
 #[tokio::test(flavor = "multi_thread")]
+async fn test_select_head_and_anchor() -> anyhow::Result<()> {
+    test((
+        platform_line(indoc! {"\
+            #[|a]#
+        "})
+        .as_str(),
+        "<A-S>",
+        platform_line(indoc! {"\
+            #[a|]#
+        "})
+        .as_str(),
+    ))
+    .await?;
+
+    test((
+        platform_line(indoc! {"\
+            #(|lorem)#
+            #[ipsum|]#
+            #(dolor|)#
+        "})
+        .as_str(),
+        "<A-S>",
+        platform_line(indoc! {"\
+            #(l|)#ore#(m|)#
+            #(i|)#psu#[m|]#
+            #(d|)#olo#(r|)#
+        "})
+        .as_str(),
+    ))
+    .await?;
+
+    test((
+        platform_line(indoc! {"\
+            #(|lorem)# #[|ipsum]# #(dolor|)#
+        "})
+        .as_str(),
+        "<A-S>",
+        platform_line(indoc! {"\
+            #(l|)#ore#(m|)# #[i|]#psu#(m|)# #(d|)#olo#(r|)#
+        "})
+        .as_str(),
+    ))
+    .await?;
+
+    Ok(())
+}
+
+#[tokio::test(flavor = "multi_thread")]
 async fn test_multi_selection_shell_commands() -> anyhow::Result<()> {
     // pipe
     test((

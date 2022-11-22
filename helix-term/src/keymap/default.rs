@@ -77,6 +77,7 @@ pub fn default() -> HashMap<Mode, Keymap> {
         "s" => select_regex,
         "A-s" => split_selection_on_newline,
         "S" => split_selection,
+        "A-S" => select_head_and_anchor,
         ";" => collapse_selection,
         "A-;" => flip_selections,
         "A-o" | "A-up" => expand_selection,
