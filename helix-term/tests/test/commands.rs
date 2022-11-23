@@ -217,6 +217,44 @@ async fn test_multi_selection_paste() -> anyhow::Result<()> {
 }
 
 #[tokio::test(flavor = "multi_thread")]
+async fn test_match_surround_command() -> anyhow::Result<()> {
+    test((
+        platform_line(indoc! {"\
+            #(|foo)#
+            #[foo|]#
+            #(foo
+            |)#"
+        })
+        .as_str(),
+        "ms_",
+        platform_line(indoc! {"\
+            #(|_foo_)#
+            #[_foo_|]#
+            #(_foo
+            _|)#"})
+        .as_str(),
+    ))
+    .await?;
+    test((
+        platform_line(indoc! {"\
+            #(|foo )#
+            #[foo |]#
+            "
+        })
+        .as_str(),
+        "ms ",
+        platform_line(indoc! {"\
+            #(| foo  )#
+            #[ foo  |]#
+            "})
+        .as_str(),
+    ))
+    .await?;
+
+    Ok(())
+}
+
+#[tokio::test(flavor = "multi_thread")]
 async fn test_multi_selection_shell_commands() -> anyhow::Result<()> {
     // pipe
     test((
