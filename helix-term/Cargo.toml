@@ -16,6 +16,20 @@ rust-version = "1.57"
 build = true
 app = true
 
+[package.metadata.deb]
+# maintainer = "? <?>"
+# copyright = "2022 <?>"
+depends = ""
+assets = [
+  ["../contrib/hx-entrypoint.sh", "usr/bin/hx", "755"],
+  ["target/release/hx", "usr/lib/helix/hx", "755"],
+  # Can't recursively import everything due to runtime/grammars/sources
+  ["../runtime/grammars/*", "usr/lib/helix/runtime/grammars/", "644"],
+  ["../runtime/queries/**/*", "usr/lib/helix/runtime/queries/", "644"],
+  ["../runtime/themes/**/*", "usr/lib/helix/runtime/themes/", "644"],
+  ["../runtime/tutor", "usr/lib/helix/runtime/tutor", "644"],
+]
+
 [features]
 default = ["git"]
 unicode-lines = ["helix-core/unicode-lines"]
